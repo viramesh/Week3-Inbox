@@ -10,6 +10,11 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var mainView: UIView!
+    var mainViewOriginalCenter:CGPoint!
+    var mainViewCurrentCenter:CGPoint!
+    var mainViewPanGesture:UIPanGestureRecognizer!
+    
     @IBOutlet weak var inboxScrollView: UIScrollView!
     @IBOutlet weak var feedView: UIView!
     @IBOutlet weak var messageViewContainer: UIView!
@@ -31,12 +36,24 @@ class ViewController: UIViewController {
     @IBOutlet weak var listOptions: UIImageView!
     @IBOutlet weak var rescheduleOptions: UIImageView!
     
+    var sidebarShown:Bool!
+    var edgeGesture:UIScreenEdgePanGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         inboxScrollView.contentSize = feedView.frame.size
         
         tapGesture = UITapGestureRecognizer(target: self, action: "onTapOptions:")
+        
+        sidebarShown = false;
+        mainViewOriginalCenter = mainView.center
+        
+        edgeGesture = UIScreenEdgePanGestureRecognizer(target: self, action: "onEdgePan:")
+        edgeGesture.edges = UIRectEdge.Left
+        mainView.addGestureRecognizer(edgeGesture)
+        
+        mainViewPanGesture = UIPanGestureRecognizer(target: self, action: "onMainViewPan:")
 
     }
 
@@ -67,7 +84,7 @@ class ViewController: UIViewController {
                     iconLater.alpha = CGFloat(convertValue(fabsf(Float(translation.x)), 0, 60, 0, 1))
                 }
                 
-                else if(translation.x > -260) {
+                else if(translation.x > -250) {
                     userAction = "later"
                     iconLater.alpha = 1
                     iconLater.center.x = iconLaterCenter.x + translation.x + 60
@@ -94,7 +111,7 @@ class ViewController: UIViewController {
                     iconArchive.alpha = CGFloat(convertValue(fabsf(Float(translation.x)), 0, 60, 0, 1))
                 }
                     
-                else if(translation.x < 260) {
+                else if(translation.x < 250) {
                     userAction = "archive"
                     iconArchive.alpha = 1
                     iconArchive.center.x = iconArchiveCenter.x + translation.x - 60
@@ -205,6 +222,81 @@ class ViewController: UIViewController {
         
     }
     
+    func onEdgePan(sender: UIScreenEdgePanGestureRecognizer) {
+        var translation = sender.translationInView(view)
+        var velocity = sender.velocityInView(view)
+        
+        if sender.state == UIGestureRecognizerState.Began {
+            mainViewCurrentCenter = mainView.center
+        }
+        else if sender.state == UIGestureRecognizerState.Changed {
+            mainView.center.x = mainViewCurrentCenter.x + translation.x
+        }
+        else if sender.state == UIGestureRecognizerState.Ended {
+            if(velocity.x > 0) {
+                showSidebar()
+            }
+            else {
+                hideSidebar()
+            }
+        }
+    }
+    
+    func onMainViewPan(sender: UIPanGestureRecognizer) {
+        var translation = sender.translationInView(view)
+        var velocity = sender.velocityInView(view)
+        
+        if sender.state == UIGestureRecognizerState.Began {
+            mainViewCurrentCenter = mainView.center
+        }
+        else if sender.state == UIGestureRecognizerState.Changed {
+            if(translation.x < 0) {
+                mainView.center.x = mainViewCurrentCenter.x + translation.x
+            }
+            else {
+                mainView.center.x = mainViewCurrentCenter.x
+            }
+        }
+        else if sender.state == UIGestureRecognizerState.Ended {
+            if(velocity.x > 0) {
+                showSidebar()
+            }
+            else {
+                hideSidebar()
+            }
+        }
+        
+    }
+    
+    @IBAction func toggleSidebar(sender: AnyObject) {
+        if(!sidebarShown){
+            showSidebar()
+        }
+        else {
+            hideSidebar()
+        }
+    }
+    
+    func showSidebar() {
+        UIView.animateWithDuration(0.4, animations: { () -> Void in
+            self.mainView.center.x = self.mainViewOriginalCenter.x + 280
+        }) { (Bool) -> Void in
+            self.sidebarShown = true
+            self.mainView.addGestureRecognizer(self.mainViewPanGesture)
+        }
+
+        
+    }
+    
+    func hideSidebar() {
+        UIView.animateWithDuration(0.4, animations: { () -> Void in
+            self.mainView.center.x = self.mainViewOriginalCenter.x
+        }) { (Bool) -> Void in
+            self.sidebarShown = false
+            self.mainView.removeGestureRecognizer(self.mainViewPanGesture)
+        }
+  
+    }
 
     
 }
