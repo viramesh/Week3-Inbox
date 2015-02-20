@@ -81,11 +81,16 @@ class ViewController: UIViewController {
             if(translation.x < 0) {
                 if(translation.x > -60) {
                     userAction = ""
+                    iconList.alpha = 0
                     iconLater.alpha = CGFloat(convertValue(fabsf(Float(translation.x)), 0, 60, 0, 1))
+                    UIView.animateWithDuration(0.2, animations: { () -> Void in
+                        self.messageViewContainer.backgroundColor = UIColor(red: 170/255, green: 170/255, blue: 170/255, alpha: 1)
+                    })
                 }
                 
                 else if(translation.x > -250) {
                     userAction = "later"
+                    iconList.alpha = 0
                     iconLater.alpha = 1
                     iconLater.center.x = iconLaterCenter.x + translation.x + 60
                     UIView.animateWithDuration(0.2, animations: { () -> Void in
@@ -108,12 +113,17 @@ class ViewController: UIViewController {
             else {
                 if(translation.x < 60) {
                     userAction = ""
+                    iconDelete.alpha = 0
                     iconArchive.alpha = CGFloat(convertValue(fabsf(Float(translation.x)), 0, 60, 0, 1))
+                    UIView.animateWithDuration(0.2, animations: { () -> Void in
+                        self.messageViewContainer.backgroundColor = UIColor(red: 170/255, green: 170/255, blue: 170/255, alpha: 1)
+                    })
                 }
                     
                 else if(translation.x < 250) {
                     userAction = "archive"
                     iconArchive.alpha = 1
+                    iconDelete.alpha = 0
                     iconArchive.center.x = iconArchiveCenter.x + translation.x - 60
                     UIView.animateWithDuration(0.2, animations: { () -> Void in
                         self.messageViewContainer.backgroundColor = UIColor(red: 126/255, green: 211/255, blue: 33/255, alpha: 1)
